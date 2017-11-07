@@ -1,0 +1,19 @@
+{
+  "name": "odatatablejs",
+  "version": "1.0.0",
+  "description": "OData + Datatable",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesNgo-CoT/ODatatableJS.git"
+  },
+  "author": "James Ngo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamesNgo-CoT/ODatatableJS/issues"
+  },
+  "homepage": "https://github.com/JamesNgo-CoT/ODatatableJS#readme"
+}
