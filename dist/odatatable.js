@@ -22,9 +22,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		// Add default initComplete option.
 		// Implementation adds header and footer search filter.
 		// Add searchType options in option.columns to alter search filter type.
-		if (!options.initComplete) {
-			options.initComplete = function () {
-				if (options.searching != false) {
+		options.initComplete = function (originalInitComplete) {
+			return function () {
+				if (originalInitComplete) {
+					originalInitComplete.apply(this, arguments);
+				}
+
+				if (options.searching) {
 					this.api().columns().every(function () {
 						var column = this;
 						var columnOptions = options.columns[column.index()];
@@ -43,7 +47,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 					});
 				}
 			};
-		};
+		}(options.initComplete);
 
 		// Standard JQuery plugin implementation.
 		return this.each(function () {

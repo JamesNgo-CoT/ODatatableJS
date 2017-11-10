@@ -18,28 +18,30 @@
 		// Add default initComplete option.
 		// Implementation adds header and footer search filter.
 		// Add searchType options in option.columns to alter search filter type.
-		if (!options.initComplete) {
-			options.initComplete = function() {
-				if (options.searching != false) {
-					this.api().columns().every(function() {
-						const column = this;
-						const columnOptions = options.columns[column.index()];
-						if (columnOptions.searchable != false) {
-							let searchType = columnOptions.searchType;
-							if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
-								searchType = 'default';
-							}
-							const searchChoices = columnOptions.searchChoices;
-							if (searchChoices) {
-								$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
-							} else {
-								$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
-							}
+		options.initComplete = ((originalInitComplete) => function() {
+			if (originalInitComplete) {
+				originalInitComplete.apply(this, arguments);
+			}
+
+			if (options.searching ) {
+				this.api().columns().every(function() {
+					const column = this;
+					const columnOptions = options.columns[column.index()];
+					if (columnOptions.searchable != false) {
+						let searchType = columnOptions.searchType;
+						if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
+							searchType = 'default';
 						}
-					});
-				}
-			};
-		};
+						const searchChoices = columnOptions.searchChoices;
+						if (searchChoices) {
+							$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
+						} else {
+							$.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
+						}
+					}
+				});
+			}
+		})(options.initComplete);
 
 		// Standard JQuery plugin implementation.
 		return this.each(function() {
