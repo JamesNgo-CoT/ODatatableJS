@@ -149,17 +149,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       options.ajax.dataFilter = function (originalDataFilter) {
         return function (data) {
           data = JSON.parse(data);
-          if (originalDataFilter) {
-            // TODO. Improve by incorporating result.
-            originalDataFilter.call(null, data);
-          }
 
-          return JSON.stringify({
+          var retValue = JSON.stringify({
             draw: draw,
             recordsTotal: data['@odata.count'],
             recordsFiltered: data['@odata.count'],
             data: data.value
           });
+
+          if (originalDataFilter) {
+            originalDataFilter.call(null, data, retValue);
+          }
+
+          return retValue;
         };
       }(options.ajax.dataFilter);
 

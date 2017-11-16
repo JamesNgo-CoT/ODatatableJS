@@ -133,18 +133,20 @@
 
       options.ajax.dataFilter = ((originalDataFilter) => (data) => {
         data = JSON.parse(data);
-				if (originalDataFilter) { // TODO. Improve by incorporating result.
-          originalDataFilter.call(null, data);
-        }
 
-        return JSON.stringify({
+        const retValue = JSON.stringify({
           draw: draw,
           recordsTotal: data['@odata.count'],
           recordsFiltered: data['@odata.count'],
           data: data.value
         });
-      })(options.ajax.dataFilter);
 
+        if (originalDataFilter) {
+          originalDataFilter.call(null, data, retValue);
+        }
+
+        return retValue;
+      })(options.ajax.dataFilter);
 
       // Turn table into datatable.
       $table.DataTable(options);
