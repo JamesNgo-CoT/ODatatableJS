@@ -136,7 +136,7 @@
 				if (originalDataFilter) { // TODO. Improve by incorporating result.
           originalDataFilter.call(null, data);
         }
-				
+
         return JSON.stringify({
           draw: draw,
           recordsTotal: data['@odata.count'],
