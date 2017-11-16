@@ -12,8 +12,8 @@
   // JQuery Plugin.
   // Options argument is used as Datatables options.
   // Read more here: https://datatables.net/reference/option/
-  $.fn.oDataTable = function(options) {
-    options = $.extend({}, defaultOptions, options);
+  $.fn.oDataTable = function(newOptions) {
+    const options = $.extend({}, defaultOptions, newOptions);
 
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
@@ -23,10 +23,11 @@
         originalInitComplete.apply(this, arguments);
       }
 
-      if (options.searching) {
+      if (options.searching != false) {
         this.api().columns().every(function() {
           const column = this;
           const columnOptions = options.columns[column.index()];
+
           if (columnOptions.searchable != false) {
             let searchType = columnOptions.searchType;
             if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
@@ -113,7 +114,7 @@
         }).join(',');
 
         if (options['$select']) {
-          retData['$select'] = retData['$select'] ? `(${retData['$select']}),${options['$select']}` : options['$select'];
+          retData['$select'] = retData['$select'] ? `${retData['$select']},${options['$select']}` : options['$select'];
         }
 
         // $SKIP parameter.
@@ -159,7 +160,7 @@
 
   $.fn.oDataTable.SearchTypes['default'] = $.fn.oDataTable.SearchTypes['string'] = $.fn.oDataTable.SearchTypes['string-contains'] = {
     getFilterString: (column, value) => {
-      return `contains(${column}, '${value}')`;
+      return `contains(tolower(${column}), '${value.toLowerCase()}')`;
     },
     setHeaderFooter: (column, options, columnOptions) => {
       let initialValue = '';

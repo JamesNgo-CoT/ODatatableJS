@@ -16,8 +16,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // JQuery Plugin.
   // Options argument is used as Datatables options.
   // Read more here: https://datatables.net/reference/option/
-  $.fn.oDataTable = function (options) {
-    options = $.extend({}, defaultOptions, options);
+  $.fn.oDataTable = function (newOptions) {
+    var options = $.extend({}, defaultOptions, newOptions);
 
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
@@ -28,10 +28,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           originalInitComplete.apply(this, arguments);
         }
 
-        if (options.searching) {
+        if (options.searching != false) {
           this.api().columns().every(function () {
             var column = this;
             var columnOptions = options.columns[column.index()];
+
             if (columnOptions.searchable != false) {
               var searchType = columnOptions.searchType;
               if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
@@ -127,7 +128,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           }).join(',');
 
           if (options['$select']) {
-            retData['$select'] = retData['$select'] ? '(' + retData['$select'] + '),' + options['$select'] : options['$select'];
+            retData['$select'] = retData['$select'] ? retData['$select'] + ',' + options['$select'] : options['$select'];
           }
 
           // $SKIP parameter.
@@ -176,7 +177,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   $.fn.oDataTable.SearchTypes['default'] = $.fn.oDataTable.SearchTypes['string'] = $.fn.oDataTable.SearchTypes['string-contains'] = {
     getFilterString: function getFilterString(column, value) {
-      return 'contains(' + column + ', \'' + value + '\')';
+      return 'contains(tolower(' + column + '), \'' + value.toLowerCase() + '\')';
     },
     setHeaderFooter: function setHeaderFooter(column, options, columnOptions) {
       var initialValue = '';
