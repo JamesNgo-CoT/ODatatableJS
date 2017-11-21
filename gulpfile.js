@@ -8,6 +8,12 @@ const rename = require("gulp-rename");
 const sass = require('gulp-sass');
 const uglify = require('gulp-uglify');
 
+gulp.task('_message', () => {
+  console.log('**************************************************');
+  console.log('ODATATABLE JS');
+  console.log('**************************************************');
+});
+
 gulp.task('_cleanJs', () => {
   return del(['dist/js']);
 });
@@ -39,7 +45,7 @@ gulp.task('uglifyJs', ['_compileJs'], () => {
 });
 
 gulp.task('watch', () => {
-  gulp.watch('./src/js/*.js', ['uglifyJs']);
+  gulp.watch('./src/js/*.js', ['_message', 'uglifyJs']);
 });
 
-gulp.task('default', ['uglifyJs', 'watch']);
+gulp.task('default', ['_message', 'uglifyJs', 'watch']);

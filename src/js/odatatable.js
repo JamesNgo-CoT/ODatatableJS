@@ -12,15 +12,15 @@
   // JQuery Plugin.
   // Options argument is used as Datatables options.
   // Read more here: https://datatables.net/reference/option/
-  $.fn.oDataTable = function(newOptions) {
-    const options = $.extend({}, defaultOptions, newOptions);
+  $.fn.oDataTable = function(options) {
+    options = $.extend({}, defaultOptions, options);
 
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
     // Add searchType options in option.columns to alter search filter type.
-    options.initComplete = ((originalInitComplete) => function() {
-      if (originalInitComplete) {
-        originalInitComplete.apply(this, arguments);
+    options.initComplete = function() {
+      if (options.onInitComplete) {
+        options.onInitComplete.apply(null, arguments);
       }
 
       if (options.searching != false) {
@@ -42,7 +42,7 @@
           }
         });
       }
-    })(options.initComplete);
+    };
 
     // Standard JQuery plugin implementation.
     return this.each(function() {
@@ -63,9 +63,9 @@
       // oData Bridge. Allow datatable to access odata values.
       let draw;
 
-      options.ajax.data = ((originalData) => (data) => {
-        if (originalData) { // TODO. Improve by incorporating result.
-          originalData.call(null, data);
+      options.ajax.data = (data) => {
+        if (options.ajax.onData) {
+          options.ajax.onData.call(null, data);
         }
 
         draw = data.draw;
@@ -129,10 +129,11 @@
             retVal.push(k + '=' + retData[k]);
           }
         }
-        return retVal.join('&');
-      })(options.ajax.data);
 
-      options.ajax.dataFilter = ((originalDataFilter) => (data) => {
+        return retVal.join('&');
+      };
+
+      options.ajax.dataFilter = (data) => {
         data = JSON.parse(data);
 
         const retValue = JSON.stringify({
@@ -142,12 +143,12 @@
           data: data.value
         });
 
-        if (originalDataFilter) {
-          originalDataFilter.call(null, data, retValue);
+        if (options.ajax.onDataFilter) {
+          options.ajax.onDataFilter.call(null, data, retValue);
         }
 
         return retValue;
-      })(options.ajax.dataFilter);
+      };
 
       // Turn table into datatable.
       $table.DataTable(options);
@@ -251,7 +252,7 @@
     },
     setHeaderFooter: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter,
     setHeaderFooter_searchChoices: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter_searchChoices
-  }
+  };
 
   $.fn.oDataTable.SearchTypes['date'] = $.fn.oDataTable.SearchTypes['date-between'] = {
     getFilterString: (column, value) => {
@@ -318,5 +319,5 @@
       $(column.footer()).append($footerInput);
     },
     setHeaderFooter_searchChoices: $.fn.oDataTable.SearchTypes['default'].setHeaderFooter_searchChoices
-  }
+  };
 })(jQuery);

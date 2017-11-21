@@ -16,39 +16,37 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // JQuery Plugin.
   // Options argument is used as Datatables options.
   // Read more here: https://datatables.net/reference/option/
-  $.fn.oDataTable = function (newOptions) {
-    var options = $.extend({}, defaultOptions, newOptions);
+  $.fn.oDataTable = function (options) {
+    options = $.extend({}, defaultOptions, options);
 
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
     // Add searchType options in option.columns to alter search filter type.
-    options.initComplete = function (originalInitComplete) {
-      return function () {
-        if (originalInitComplete) {
-          originalInitComplete.apply(this, arguments);
-        }
+    options.initComplete = function () {
+      if (options.onInitComplete) {
+        options.onInitComplete.apply(null, arguments);
+      }
 
-        if (options.searching != false) {
-          this.api().columns().every(function () {
-            var column = this;
-            var columnOptions = options.columns[column.index()];
+      if (options.searching != false) {
+        this.api().columns().every(function () {
+          var column = this;
+          var columnOptions = options.columns[column.index()];
 
-            if (columnOptions.searchable != false) {
-              var searchType = columnOptions.searchType;
-              if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
-                searchType = 'default';
-              }
-              var searchChoices = columnOptions.searchChoices;
-              if (searchChoices) {
-                $.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
-              } else {
-                $.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
-              }
+          if (columnOptions.searchable != false) {
+            var searchType = columnOptions.searchType;
+            if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
+              searchType = 'default';
             }
-          });
-        }
-      };
-    }(options.initComplete);
+            var searchChoices = columnOptions.searchChoices;
+            if (searchChoices) {
+              $.fn.oDataTable.SearchTypes[searchType].setHeaderFooter_searchChoices(column, options, columnOptions, searchChoices);
+            } else {
+              $.fn.oDataTable.SearchTypes[searchType].setHeaderFooter(column, options, columnOptions);
+            }
+          }
+        });
+      }
+    };
 
     // Standard JQuery plugin implementation.
     return this.each(function () {
@@ -73,98 +71,94 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // oData Bridge. Allow datatable to access odata values.
       var draw = void 0;
 
-      options.ajax.data = function (originalData) {
-        return function (data) {
-          if (originalData) {
-            // TODO. Improve by incorporating result.
-            originalData.call(null, data);
-          }
+      options.ajax.data = function (data) {
+        if (options.ajax.onData) {
+          options.ajax.onData.call(null, data);
+        }
 
-          draw = data.draw;
+        draw = data.draw;
 
-          var retData = {};
+        var retData = {};
 
-          // $COUNT parameter.
-          retData['$count'] = 'true';
+        // $COUNT parameter.
+        retData['$count'] = 'true';
 
-          // $FILTER parameter.
-          retData['$filter'] = data.columns.filter(function (column, index) {
-            if (column.searchable && column.search != null && column.search.value) {
-              var searchType = options.columns[index].searchType;
-              if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
-                searchType = 'default';
-              }
-              column.filterString = $.fn.oDataTable.SearchTypes[searchType].getFilterString(column.data, column.search.value);
-              return column.filterString;
+        // $FILTER parameter.
+        retData['$filter'] = data.columns.filter(function (column, index) {
+          if (column.searchable && column.search != null && column.search.value) {
+            var searchType = options.columns[index].searchType;
+            if (!searchType || !$.fn.oDataTable.SearchTypes[searchType]) {
+              searchType = 'default';
             }
-            return false;
-          }).map(function (column) {
+            column.filterString = $.fn.oDataTable.SearchTypes[searchType].getFilterString(column.data, column.search.value);
             return column.filterString;
-          }).join(' and ') || null;
-
-          if (options['$filter']) {
-            retData['$filter'] = retData['$filter'] ? '(' + retData['$filter'] + ') and ' + options['$filter'] : options['$filter'];
           }
+          return false;
+        }).map(function (column) {
+          return column.filterString;
+        }).join(' and ') || null;
 
-          // $ORDERBY parameter.
-          retData['$orderby'] = data.order.map(function (order) {
-            return data.columns[order.column].data + ' ' + order.dir;
-          }).join(',') || null;
+        if (options['$filter']) {
+          retData['$filter'] = retData['$filter'] ? '(' + retData['$filter'] + ') and ' + options['$filter'] : options['$filter'];
+        }
 
-          if (options['$orderby']) {
-            retData['$orderby'] = retData['$orderby'] ? '(' + retData['$orderby'] + '),' + options['$orderby'] : options['$orderby'];
+        // $ORDERBY parameter.
+        retData['$orderby'] = data.order.map(function (order) {
+          return data.columns[order.column].data + ' ' + order.dir;
+        }).join(',') || null;
+
+        if (options['$orderby']) {
+          retData['$orderby'] = retData['$orderby'] ? '(' + retData['$orderby'] + '),' + options['$orderby'] : options['$orderby'];
+        }
+
+        // $SEARCH parameter.
+        retData['$search'] = function () {
+          return data.search && data.search.value ? data.search.value : null;
+        }();
+
+        // $SELECT parameter.
+        retData['$select'] = data.columns.filter(function (column, index, array) {
+          return array.indexOf(column) === index;
+        }).map(function (column) {
+          return column.data;
+        }).join(',');
+
+        if (options['$select']) {
+          retData['$select'] = retData['$select'] ? retData['$select'] + ',' + options['$select'] : options['$select'];
+        }
+
+        // $SKIP parameter.
+        retData['$skip'] = data.start;
+
+        // $TOP parameter.
+        retData['$top'] = data.length;
+
+        var retVal = [];
+        for (var k in retData) {
+          if (retData[k] != null) {
+            retVal.push(k + '=' + retData[k]);
           }
+        }
 
-          // $SEARCH parameter.
-          retData['$search'] = function () {
-            return data.search && data.search.value ? data.search.value : null;
-          }();
+        return retVal.join('&');
+      };
 
-          // $SELECT parameter.
-          retData['$select'] = data.columns.filter(function (column, index, array) {
-            return array.indexOf(column) === index;
-          }).map(function (column) {
-            return column.data;
-          }).join(',');
+      options.ajax.dataFilter = function (data) {
+        data = JSON.parse(data);
 
-          if (options['$select']) {
-            retData['$select'] = retData['$select'] ? retData['$select'] + ',' + options['$select'] : options['$select'];
-          }
+        var retValue = JSON.stringify({
+          draw: draw,
+          recordsTotal: data['@odata.count'],
+          recordsFiltered: data['@odata.count'],
+          data: data.value
+        });
 
-          // $SKIP parameter.
-          retData['$skip'] = data.start;
+        if (options.ajax.onDataFilter) {
+          options.ajax.onDataFilter.call(null, data, retValue);
+        }
 
-          // $TOP parameter.
-          retData['$top'] = data.length;
-
-          var retVal = [];
-          for (var k in retData) {
-            if (retData[k] != null) {
-              retVal.push(k + '=' + retData[k]);
-            }
-          }
-          return retVal.join('&');
-        };
-      }(options.ajax.data);
-
-      options.ajax.dataFilter = function (originalDataFilter) {
-        return function (data) {
-          data = JSON.parse(data);
-
-          var retValue = JSON.stringify({
-            draw: draw,
-            recordsTotal: data['@odata.count'],
-            recordsFiltered: data['@odata.count'],
-            data: data.value
-          });
-
-          if (originalDataFilter) {
-            originalDataFilter.call(null, data, retValue);
-          }
-
-          return retValue;
-        };
-      }(options.ajax.dataFilter);
+        return retValue;
+      };
 
       // Turn table into datatable.
       $table.DataTable(options);
