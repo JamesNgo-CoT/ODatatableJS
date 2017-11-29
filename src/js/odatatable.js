@@ -264,8 +264,8 @@
         return '';
       }
 
-      const start = moment(dates[0]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-      const end = moment(dates[1]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+      const start = moment(dates[0], 'MM/DD/YYYY').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+      const end = moment(dates[1], 'MM/DD/YYYY').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
       if (start == 'Invalid date' || end == 'Invalid date') {
         return '';
       }
@@ -296,7 +296,7 @@
         autoUpdateInput: false
       });
       $headerInput.on('apply.daterangepicker', (e, p) => {
-        $headerInput.val(`${p.startDate.format('YYYY/MM/DD')} - ${p.endDate.format('YYYY/MM/DD')}`);
+        $headerInput.val(`${p.startDate.format('MM/DD/YYYY')} - ${p.endDate.format('MM/DD/YYYY')}`);
         $headerInput.trigger('change');
       });
       $(column.header()).append($($.fn.oDataTable.headerWrapperString).append($headerInput));
@@ -312,7 +312,7 @@
         autoUpdateInput: false
       });
       $footerInput.on('apply.daterangepicker', (e, p) => {
-        $footerInput.val(`${p.startDate.format('YYYY/MM/DD')} - ${p.endDate.format('YYYY/MM/DD')}`);
+        $footerInput.val(`${p.startDate.format('MM/DD/YYYY')} - ${p.endDate.format('MM/DD/YYYY')}`);
         $footerInput.trigger('change');
       });
       $(column.footer()).append($footerInput);
