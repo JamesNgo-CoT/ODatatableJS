@@ -18,6 +18,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   $.fn.oDataTable = function (options) {
     options = $.extend({}, defaultOptions, options);
 
+    // Sort Order
+    var columns = options.columns || [];
+    var columnsLength = columns.length;
+    var order = [];
+    for (var i = 0; i < columnsLength; i++) {
+      if (columns[i].sortOrder) {
+        order.push([index, columns[i].sortOrder]);
+      }
+    }
+    if (order.length) {
+      options.order = order;
+    }
+
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
     // Add searchType options in option.columns to alter search filter type.
@@ -112,7 +125,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         // $SEARCH parameter.
         retData['$search'] = function () {
-          return data.search && data.search.value ? data.search.value : null;
+          return data.search && data.search.value ? '"' + data.search.value + '"' : null;
         }();
 
         // $SELECT parameter.

@@ -14,6 +14,19 @@
   $.fn.oDataTable = function(options) {
     options = $.extend({}, defaultOptions, options);
 
+    // Sort Order
+    const columns = options.columns || [];
+    const columnsLength = columns.length;
+    const order = [];
+    for (let i = 0; i < columnsLength; i++) {
+      if (columns[i].sortOrder) {
+        order.push([index, columns[i].sortOrder]);
+      }
+    }
+    if (order.length) {
+      options.order = order;
+    }
+
     // Add default initComplete option.
     // Implementation adds header and footer search filter.
     // Add searchType options in option.columns to alter search filter type.
@@ -103,7 +116,7 @@
         }
 
         // $SEARCH parameter.
-        retData['$search'] = (() => data.search && data.search.value ? data.search.value : null)();
+        retData['$search'] = (() => data.search && data.search.value ? '"' + data.search.value + '"' : null)();
 
         // $SELECT parameter.
         retData['$select'] = data.columns.filter((column, index, array) => {
