@@ -1,3 +1,8 @@
+.container-fluid #maincontent table.div.table-responsive,
+div.table-responsive {
+  margin: 0;
+}
+
 .container-fluid #maincontent table.dataTable,
 table.dataTable {
   thead {
