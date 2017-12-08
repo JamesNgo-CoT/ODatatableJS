@@ -1,0 +1,37 @@
+.container-fluid #maincontent table.dataTable,
+table.dataTable {
+  thead {
+    tr {
+      th {
+        padding-right: 30px;
+
+        &.sorting:after,
+        &.sorting_asc:after,
+        &.sorting_desc:after {
+          top: 4px;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      td {
+        border-top: 0;
+      }
+    }
+  }
+
+  td,
+  th {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.container-fluid #maincontent .dt-buttons,
+.dt-buttons {
+  display: none;
+}
