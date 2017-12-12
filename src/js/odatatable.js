@@ -20,7 +20,7 @@
     const order = [];
     for (let i = 0; i < columnsLength; i++) {
       if (columns[i].sortOrder) {
-        order.push([index, columns[i].sortOrder]);
+        order.push([i, columns[i].sortOrder]);
       }
     }
     if (order.length) {
